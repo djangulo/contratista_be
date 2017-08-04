@@ -1,0 +1,14 @@
+db.sqlite3
+geckodriver.log
+__pycache__
+*.pyc
+
+media
+
+*_unsafe*
+
+fablog.log
+
+virtualenv
+
+.coverage
