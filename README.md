@@ -2,10 +2,23 @@
 
 Starter seed for a Django Rest Framework RESTful API; initially configured for development.
 
+It contains the following:
+
+ - Built in `accounts` app:
+   - Custom user with email/username
+   - Automatic [Token](http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication) creation on user creation. To disable, remove or comment out lines 15 through 18 on `accounts/models.py`.
+   - `UserSerializer`: serializer for the custom user model. Email field is `write_only` by default.
+   - `UserViewSet`: viewset with `retrieve`, `update`, `destroy`, `list` methods. Registered under `accounts` on the `DefaultRouter`.
+   - `RegisterUserViewSet`: with custom `create` method, as registration is usually handled separately (and permission free `post` requests). Registered under `register` on the `DefaultRouter`.
+   - `ThrottledObtainToken` and `throttled_obtain_token` class and view, respectively: throttled version of DRF's standard `obtain_auth_token` view.
+   - `AllowPostFromUnregisteredUser` permission, self explanatory. Used for registering unauthenticated users.
+   - `IsOwnerOrReadOnly` permission, object level permission.
+
+
 This project depends on (as of 8/4/2017):
 
- - [git](https://git-scm.com/) Version control and dependency management
- - [python 3](http://python.org/) Global install to make virtualenv
+ - [git](https://git-scm.com/) - Version control and dependency management
+ - [python 3](http://python.org/) - Global install to make virtualenv
  - [virtualenv](https://pypi.python.org/pypi/virtualenv) - Global install to make virtualenv
  - [django](https://www.djangoproject.com/) - High level Python Web Framework
  - [django-rest-framework](http://www.django-rest-framework.org/) - core RESTful API framework
@@ -19,11 +32,11 @@ For a manual installation, go to [manual install](#manual-install)
 
 Clone the repo and run the install.py script
 
-`python install.py my_project`
+`python setup.py my_project`
 
 The install.py script can be run with the optional arguments below. Most arguments (except `--project-name`) carry a default value which you can later override.
 
- - `--project-name`
+ - `project-name`
     
     Name for the DRF project. Positional and must be first. Required.
 
@@ -31,18 +44,18 @@ The install.py script can be run with the optional arguments below. Most argumen
 
     Prefix for the API endpoints. Example:
 
-        python install.py my_project --api-url-prefix my-api/v1
+        python setup.py my_project --api-url-prefix my-api/v1/
         
     will result in endpoints being at 
 
         http://localhost:8000/my-api/v1/endpoint
 
  - `--proxy`
-    - If you're behind a proxy, this will tell `pip` to use these credentials
+    - If you're behind a proxy, this will tell `pip` to use these credentials when downloading
     - Use as follows: `--proxy user:password@address:port`
     - Example:
 
-        `python install.py my_project --proxy djangulo:hunter2@proxy-address:1234`
+        `python setup.py my_project --proxy djangulo:hunter2@proxy-address:1234`
 
         when the script calls pip, it will run:
 
@@ -61,10 +74,9 @@ The install.py script can be run with the optional arguments below. Most argumen
  - `--default-pagination`
     - Default pagination class for `DEFAULT_PAGINATION_CLASS` in `settings.py`
     - options: `page`, `limitoffset`, `cursor`
-    - Defaults to `none`.
 
  - `--page-size`
-    - Integer to set page size, ignored if `--default-pagination` is none.
+    - Integer to set page size, ignored if `--default-pagination` is not set.
     - If `--default-pagination` is provided, defaults to 20.
 
  - `--default-throttling`
@@ -73,7 +85,7 @@ The install.py script can be run with the optional arguments below. Most argumen
     - The argument for the `scoped` option should be a comma separated key-value pairs.
     - Example:
 
-        `python install.py --default-throttling anon=1000/day user=1000/hour scoped=contacts:1000/day,uploads:10/minute`
+        `python setup.py --default-throttling anon=1000/day user=1000/hour scoped=contacts:1000/day,uploads:10/minute`
  
  - `--static`
     - Configures `STATIC_ROOT` and `STATIC_URL` in `settings.py` to whatever argument is passed.
@@ -94,7 +106,7 @@ The install.py script can be run with the optional arguments below. Most argumen
 
 ### Manual install
 
-Run the steps the script would follow manually:
+Run the steps the `setup.py` script would follow manually:
 
 Note some of the sed operations are inserting text down-top (as opposed to top-down, how we normally write)
 
@@ -123,7 +135,7 @@ Note some of the sed operations are inserting text down-top (as opposed to top-d
 
     Set the API url prefix
 
-        sed -i "s:r'':r'my-prefix/my-version':" my_project/urls.py
+        sed -i "s:(r':(r'my-prefix/my-version/:g" my_project/urls.py
 
     Set default authentication class(es):
 

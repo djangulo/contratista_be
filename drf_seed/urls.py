@@ -15,10 +15,19 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from rest_framework.routers import DefaultRouter
+from accounts.api import (
+    throttled_obtain_token,
+    UserViewSet,
+    RegisterUserViewSet
+)
 
 router = DefaultRouter()
+router.register('accounts', UserViewSet)
+router.register('register', RegisterUserViewSet, base_name='register')
 # router.register(r'my_viewset`, MyViewSet)
 
 urlpatterns = [
+    url(r'', throttled_obtain_token = ThrottledObtainToken.as_view()
+, name='get-token'),
     url(r'', include(router.urls))
 ]

@@ -37,9 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework.authtoken',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -122,7 +123,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+AUTH_USER_MODEL = 'accounts.User'
+
 REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_RATES': {
+        'authtoken': '10/minute',
+    }
 }
 
 # CORS settings
