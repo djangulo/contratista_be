@@ -87,7 +87,7 @@ The install.py script can be run with the optional arguments below. Most argumen
 
     - Example:
 
-            python setup.py --throttling anon=1000/day user=1000/hour contacts=1000/day uploads=10/minute
+            python setup.py my_project --throttling anon=1000/day user=1000/hour contacts=1000/day uploads=10/minute
  
  - `--static`
     - Configures `STATIC_ROOT` and `STATIC_URL` in `settings.py` to whatever argument is passed.
