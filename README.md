@@ -19,7 +19,6 @@ This project depends on (as of 8/4/2017):
 
  - [git](https://git-scm.com/) - Version control and dependency management
  - [python 3](http://python.org/) - Global install to make virtualenv
- - [virtualenv](https://pypi.python.org/pypi/virtualenv) - Global install to make virtualenv
  - [django](https://www.djangoproject.com/) - High level Python Web Framework
  - [django-rest-framework](http://www.django-rest-framework.org/) - core RESTful API framework
  - [django-cors-headers](https://github.com/ottoyiu/django-cors-headers) - Allows simple CORS operations
@@ -32,23 +31,14 @@ For a manual installation, go to [manual install](#manual-install)
 
 Clone the repo and run the install.py script
 
-`python setup.py my_project`
+    git clone https://github.com/djangulo/drf_seed.git my_project
+    python setup.py my_project
 
-The install.py script can be run with the optional arguments below. Most arguments (except `--project-name`) carry a default value which you can later override.
+The install.py script can be run with the optional arguments below. Most arguments (except `project-name`) carry a default value which you can later override.
 
  - `project-name`
     
     Name for the DRF project. Positional and must be first. Required.
-
- - `--api-url-prefix`
-
-    Prefix for the API endpoints. Example:
-
-        python setup.py my_project --api-url-prefix my-api/v1/
-        
-    will result in endpoints being at 
-
-        http://localhost:8000/my-api/v1/endpoint
 
  - `--proxy`
     - If you're behind a proxy, this will tell `pip` to use these credentials when downloading
@@ -61,7 +51,7 @@ The install.py script can be run with the optional arguments below. Most argumen
 
         `pip --proxy djangulo:hunter2@proxy-address:1234 install bar foo foo-bar`
 
- - `--auth-type`
+ - `--auth`
     - Default authentication class(es) for `DEFAULT_AUTHENTICATION_CLASSES` in `settings.py`
     - Options:  any combination of `basic`, `token`, `session`.
     - Will be added in the order provided
@@ -71,21 +61,33 @@ The install.py script can be run with the optional arguments below. Most argumen
     - Options: `simple`, `default`, `none`
     - Defaults to `default`, `none` removes the router from `my_project/urls.py`
 
- - `--default-pagination`
+ - `---pagination`
     - Default pagination class for `DEFAULT_PAGINATION_CLASS` in `settings.py`
-    - options: `page`, `limitoffset`, `cursor`
+    - options: `page`, `limitoffset`, `cursor`, `none`
+    - Defaults to `page`
 
  - `--page-size`
-    - Integer to set page size, ignored if `--default-pagination` is not set.
+    - Integer to set page size, ignored if `--pagination` is not set.
     - If `--default-pagination` is provided, defaults to 20.
 
- - `--default-throttling`
+ - `--throttling`
     - Default throttle class(es) for `DEFAULT_THROTTLE_CLASSES` in `settings.py`
-    - Any combination of: `anon`, `user`, `scoped` followed by the rate as  `{rate}/{second,minute,hour,day,month,year}`.
-    - The argument for the `scoped` option should be a comma separated key-value pairs.
+    - Any combination of: `anon`, `user`, or `scoped` followed by the rate as  `{rate}/{second,minute,hour,day,month,year}`.
+    - Any argument not named `anon` or `user` will be considered `scoped`.
+    - Keep in mind scoped throttle rates need to be set on a per-view basis:
+
+            # python
+            from rest_framework.throttling import ScopedRateThrottle
+            from rest_frameworkviews import APIView
+
+            class MyViewSet(APIView):
+                throttle_classes = (ScopedRateThrottle,)
+                throttle_scope = 'authtoken'
+                ...
+
     - Example:
 
-        `python setup.py --default-throttling anon=1000/day user=1000/hour scoped=contacts:1000/day,uploads:10/minute`
+            python setup.py --throttling anon=1000/day user=1000/hour contacts=1000/day uploads=10/minute
  
  - `--static`
     - Configures `STATIC_ROOT` and `STATIC_URL` in `settings.py` to whatever argument is passed.
@@ -110,13 +112,13 @@ Run the steps the `setup.py` script would follow manually:
 
 Note some of the sed operations are inserting text down-top (as opposed to top-down, how we normally write)
 
+ - Clone the repo
+
+        git clone https://github.com/djangulo/drf_seed.git my_project
+
  - Create a virtualenv and activate it
 
         python -m venv virtualenv && source virtualenv/bin/activate
-
- - Clone the repo
-
-        git clone https://github.com/djangulo/drf_seed.git
 
  - Install requirements.txt using pip
 
@@ -124,7 +126,7 @@ Note some of the sed operations are inserting text down-top (as opposed to top-d
 
  - Configure, all of which are obviously optional:
 
-    I'm a big fan of sed, although it can get unwieldy for some longer commangs. I would suggest creating an environment variable for the project name, as it will be extensively used from here onward:
+    I'm a big fan of sed, although it can get unwieldy for some longer commands. I would suggest creating an environment variable for the project name, as it will be extensively used from here onward:
 
         PROJECT_NAME=my_project`
 
