@@ -129,12 +129,8 @@ class SetupDrfSeed:
         """Renames project's generic name with your own"""
         run(f'cd {BASE_DIR}')
         if 'drf_seed' in os.listdir(BASE_DIR):
-            if 'win' in sys.platform:
-                run(f'sed -i s:drf_seed:{self.project_name}:g drf_seed/*')
-                run(f'move drf_seed {self.project_name}')
-            else:
-                run(f'sed -i s:drf_seed:{self.project_name}:g drf_seed/* && mv drf_seed')
-                run(f'mv drf_seed {self.project_name}')
+            run(f'sed -i s:drf_seed:{self.project_name}:g drf_seed/*')
+            run(f'mv drf_seed {self.project_name}')
 
     def _set_router(self, router=None):
         """Sets default router to use, if any"""
