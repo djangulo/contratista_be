@@ -127,7 +127,6 @@ class SetupDrfSeed:
 
     def _rename_drf_seed_instances(self):
         """Renames project's generic name with your own"""
-        run(f'cd {BASE_DIR}')
         if 'drf_seed' in os.listdir(BASE_DIR):
             run(f'sed -i s:drf_seed:{self.project_name}:g drf_seed/*')
             run(f'mv drf_seed {self.project_name}')
