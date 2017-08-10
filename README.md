@@ -72,9 +72,9 @@ The install.py script can be run with the optional arguments below. Most argumen
 
  - `--throttling`
     - Default throttle class(es) for `DEFAULT_THROTTLE_CLASSES` in `settings.py`
-    - Any combination of: `anon`, `user`, or `scoped` followed by the rate as  `{rate}/{second,minute,hour,day,month,year}`.
-    - Any argument not named `anon` or `user` will be considered `scoped`.
-    - Keep in mind scoped throttle rates need to be set on a per-view basis:
+    - Any combination of: `anon`, `user`, `scoped` followed by the rate as  `{rate}/{second,minute,hour,day,month,year}`.
+    - Any argument not named `anon` or `user` will be considered a `scoped` variation.
+    - Add an empty argument for scoped to add it to the default classes, otherwise, you'll need to add the scoped class on a per-view basis:
 
             # python
             from rest_framework.throttling import ScopedRateThrottle
@@ -87,23 +87,23 @@ The install.py script can be run with the optional arguments below. Most argumen
 
     - Example:
 
-            python setup.py my_project --throttling anon=1000/day user=1000/hour contacts=1000/day uploads=10/minute
+            python setup.py my_project --throttling anon=1000/day scoped user=1000/hour contacts=1000/day uploads=10/minute
  
- - `--static`
-    - Configures `STATIC_ROOT` and `STATIC_URL` in `settings.py` to whatever argument is passed.
+ - `--static-root`
+    - Configures `STATIC_ROOT` in `settings.py` to whatever arguments is passed.
     - If called without argument, will default to `static` folder in the root dir.
+ - `--static-url`
+    - Configures `STATIC_URL` in `settings.py` to whatever argument is passed.
+    - If called without argument, will default to `/static/` url.
 
 - `--media-root`
     - Configures `MEDIA_ROOT` in `settings.py` to whatever argument is passed; to `media` folder in root dir
-    - Will be setup automatically if `--media-url` is set without a media-root.
-    - Will add a media outlet url to `my_project/urlpatterns.py`.
     - This is necessary if you intend to work with and display images.
 
 - `--media-url`
     - Configures `MEDIA_URL` in `settings.py` to whatever argument is passed.
-    - If no argument is passed, will default to 'media' folder in root dir.
-    - Will be setup automatically if `--media-root` is set without a media-url.
-    - Will add a media outlet url to `my_project/urlpatterns.py`.
+    - If no argument is passed, will default to `/media/` url.
+    - If set, also configures `urls.py` to display media.
     - This is necessary if you intend to work with and display images.
 
 ### Manual install
