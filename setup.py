@@ -17,6 +17,7 @@ class SetupDrfSeed:
         """Utility method to provide a project/settings.py handle and a
         settings.REST_FRAMEWORK handle"""
         self.project_name = proj
+        self._rename_drf_seed_instances()
         self.settings_str = f'{self.project_name}/settings.py'
         try:
             self.settings = __import__(
