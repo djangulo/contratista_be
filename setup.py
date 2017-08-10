@@ -309,9 +309,8 @@ class SetupDrfSeed:
 
 if __name__ == '__main__':
     s = SetupDrfSeed()
-    # s._create_virtualenv()
-    # s._install_dependencies(s._args.proxy)
-    print(s._args)
+    s._create_virtualenv()
+    s._install_dependencies(s._args.proxy)
     s._set_router(s._args.router)
     s._set_auth_classes(s._args.auth)
     s._set_pagination(s._args.pagination, s._args.page_size)

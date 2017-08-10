@@ -124,35 +124,7 @@ Note some of the sed operations are inserting text down-top (as opposed to top-d
 
         pip install -r requirements.txt
 
- - Configure, all of which are obviously optional:
-
-    I'm a big fan of sed, although it can get unwieldy for some longer commands. I would suggest creating an environment variable for the project name, as it will be extensively used from here onward:
-
-        PROJECT_NAME=my_project`
-
-    Rename all instances of `drf_seed` to your projects name (`my_project` on the following examples)
-
-        sed -i s:drf_seed:$PROJECT_NAME:g drf_seed/* && mv drf_seed $PROJECT_NAME
-        sed -i s:drf_seed:$PROJECT_NAME:g manage.py
-
-    Set the API url prefix
-
-        sed -i "s:(r':(r'my-prefix/my-version/:g" my_project/urls.py
-
-    Set default authentication class(es):
-
-       sed "/REST_FRAMEWORK/a\    )," $PROJECT_NAME/settings.py \
-       | sed "/REST_FRAMEWORK/a\        'rest_framework.authentication.TokenAuthentication'," \
-       | sed "/REST_FRAMEWORK/a\    'DEFAULT_AUTHENTICATION_CLASSES': (," \
-       | tee $PROJECT_NAME/settings.py
-
-    `sed -i "/REST_FRAMEWORK/a\    )," $PROJECT_NAME/settings.py`
-
-    `sed -i "/REST_FRAMEWORK/a\        'rest_framework.authentication.TokenAuthentication'," my_project/settings.py`
-
-    `sed -i "/REST_FRAMEWORK/a\        'rest_framework.authentication.SessionAuthentication'," my_project/settings.py`
-
-    `sed -i "/REST_FRAMEWORK/a\    'DEFAULT_AUTHENTICATION_CLASSES': (," my_project/settings.py`
+ - Configure `settings.REST_FRAMEWORK` to taste
 
 
 
