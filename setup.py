@@ -1,8 +1,6 @@
 import argparse
 import os
-import re
 import sys
-from importlib import import_module
 from subprocess import Popen, PIPE, run
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
