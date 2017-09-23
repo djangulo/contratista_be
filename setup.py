@@ -5,8 +5,8 @@ from subprocess import Popen, PIPE, run
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def __run__(*args):
-    return run(*args, shell=True)
+def __run__(*args, **kwargs):
+    return run(*args, **kwargs, shell=True)
 
 class SetupDrfSeed:
     """Sets up the drf_seed project, along with some settings in
