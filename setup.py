@@ -121,12 +121,14 @@ class SetupDrfSeed:
         """Installs 'requirements.txt using pip"""
         if 'win' in sys.platform:
             command = f'{BASE_DIR}\\virtualenv\\Scripts\\pip '
-            command += f"--proxy {proxy  + ' ' if proxy else ''}"
+            if proxy is not None:
+                command += f'--proxy {proxy} '
             command += f'install -r {BASE_DIR}\\requirements.txt'
             __run__(command)
         else:
             command = f'{BASE_DIR}/virtualenv/bin/pip '
-            command += f"--proxy {proxy + ' ' if proxy else ''}"
+            if proxy is not None:
+                command += f'--proxy {proxy} '
             command += f'install -r {BASE_DIR}/requirements.txt'
             __run__(command)
 
@@ -314,9 +316,9 @@ class SetupDrfSeed:
             chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
             key = ''.join(SystemRandom().choice(chars) for _ in range(50))
             with open(secret_key_file, 'w') as fn:
-                fn.write(f'SECRET_KEY = "{key}""')
-        __run__(f'''sed -i "s/SECRET_KEY = ''/#SECRET_KEY = ''/g" {self.settings_str}''')
-        __run__(f'''sed -i "/import os/a\\from .secret_key import SECRET_KEY" {self.settings_str}''')
+                fn.write(f'SECRET_KEY = "{key}"')
+            __run__(f'''sed -i "s/SECRET_KEY = ''/#SECRET_KEY = ''/g" {self.settings_str}''')
+            __run__(f'''sed -i "/import os/a\\from .secret_key import SECRET_KEY" {self.settings_str}''')
 
 
 if __name__ == '__main__':
