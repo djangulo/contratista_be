@@ -1,7 +1,9 @@
 import argparse
 import os
 import sys
+
 from subprocess import Popen, PIPE, run
+from random import SystemRandom
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -304,7 +306,18 @@ class SetupDrfSeed:
             __run__(f'''sed -i "/from django.conf.urls/i\\from django.conf import settings" {self.project_name}/urls.py''')
             __run__(f'''sed -i "/from django.conf.urls/a\\from django.conf.urls.static import static" {self.project_name}/urls.py''')
             __run__(f'''sed -i "/static(settings.MEDIA_URL,/d" {self.project_name}/urls.py''')
-            __run__(r'''sed -i "$a\urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)" {name}/urls.py'''.format(name=self.project_name))
+            #__run__(r'''sed -i "$a\urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)" {name}/urls.py'''.format(name=self.project_name))
+
+    def _create_and_set_secret_key(self):
+        secret_key_file = os.path.join(BASE_DIR, self.project_name, 'secret_key.py')
+        if not secret_key_file in os.listdir(os.path.join(BASE_DIR, self.project_name)):
+            chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+            key = ''.join(systemRandom().choice(chars) for _ in range(50))
+            with open(secret_key_file, 'w') as fn:
+                fn.write(f'SECRET_KEY = "{key}""')
+        __run__(f'''sed -i "s/SECRET_KEY = ''/#SECRET_KEY = ''/g" {self.settings_str}''')
+        __run__(f'''sed -i "/import os/a\\from .secret_key import SECRET_KEY''')
+
 
 if __name__ == '__main__':
     s = SetupDrfSeed()
@@ -318,3 +331,4 @@ if __name__ == '__main__':
     s._set_static_url(s._args.static_url)
     s._set_media_root(s._args.media_root)
     s._set_media_url(s._args.media_url)
+    s._create_and_set_secret_key()
