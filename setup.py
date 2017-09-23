@@ -316,7 +316,7 @@ class SetupDrfSeed:
             with open(secret_key_file, 'w') as fn:
                 fn.write(f'SECRET_KEY = "{key}""')
         __run__(f'''sed -i "s/SECRET_KEY = ''/#SECRET_KEY = ''/g" {self.settings_str}''')
-        __run__(f'''sed -i "/import os/a\\from .secret_key import SECRET_KEY''')
+        __run__(f'''sed -i "/import os/a\\from .secret_key import SECRET_KEY" {self.settings_str}''')
 
 
 if __name__ == '__main__':
