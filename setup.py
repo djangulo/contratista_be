@@ -5,6 +5,9 @@ from subprocess import Popen, PIPE, run
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+def __run__(*args):
+    return run(*args, shell=True)
+
 class SetupDrfSeed:
     """Sets up the drf_seed project, along with some settings in
     urls.py and settings.py"""
@@ -35,26 +38,26 @@ class SetupDrfSeed:
         """Checks that requirements are installed and determines the
         python cli command to invoke"""
         try:
-            outs, errs = Popen('sed --version', stdout=PIPE).communicate(timeout=5)
+            outs, errs = Popen('sed --version', stdout=PIPE, shell=True).communicate(timeout=5)
         except FileNotFoundError:
             sys.exit('ERROR: sed is not installed or is not found in $PATH')
         try:
-            outs, errs = Popen('git --version', stdout=PIPE).communicate(timeout=5)
+            outs, errs = Popen('git --version', stdout=PIPE, shell=True).communicate(timeout=5)
         except FileNotFoundError:
             sys.exit('ERROR: git is not installed or is not found in $PATH')
         try:
-            outs, errs = Popen('python3.6 --version', stdout=PIPE).communicate(timeout=5)
+            outs, errs = Popen('python3.6 --version', stdout=PIPE, shell=True).communicate(timeout=5)
             self.python_caller = 'python3.6'
         except FileNotFoundError:
             try:
-                outs, errs = Popen('python3 --version', stdout=PIPE).communicate(timeout=5)
+                outs, errs = Popen('python3 --version', stdout=PIPE, shell=True).communicate(timeout=5)
                 if '3.6' in str(outs):
                     self.python_caller = 'python3'
                 else:
                     sys.exit('This script only compatible with python >= 3.6.1')
             except FileNotFoundError:
                 try:
-                    outs, errs = Popen('python --version', stdout=PIPE).communicate(timeout=5)
+                    outs, errs = Popen('python --version', stdout=PIPE, shell=True).communicate(timeout=5)
                     if '3.6' in str(outs):
                         self.python_caller = 'python'
                     else:
@@ -107,10 +110,10 @@ class SetupDrfSeed:
         if 'virtualenv' not in os.listdir(BASE_DIR):
             if 'win' in sys.platform:
                 command = f'{self.python_caller} -m venv {BASE_DIR}\\virtualenv'
-                run(command, stdout=PIPE)
+                __run__(command, stdout=PIPE)
             else:
                 command = f'{self.python_caller} -m venv {BASE_DIR}/virtualenv'
-                run(command, stdout=PIPE)
+                __run__(command, stdout=PIPE)
 
     def _install_dependencies(self, proxy=None):
         """Installs 'requirements.txt using pip"""
@@ -118,18 +121,18 @@ class SetupDrfSeed:
             command = f'{BASE_DIR}\\virtualenv\\Scripts\\pip '
             command += f"--proxy {proxy  + ' ' if proxy else ''}"
             command += f'install -r {BASE_DIR}\\requirements.txt'
-            run(command)
+            __run__(command)
         else:
             command = f'{BASE_DIR}/virtualenv/bin/pip '
             command += f"--proxy {proxy + ' ' if proxy else ''}"
             command += f'install -r {BASE_DIR}/requirements.txt'
-            run(command)
+            __run__(command)
 
     def _rename_drf_seed_instances(self):
         """Renames project's generic name with your own"""
         if 'drf_seed' in os.listdir(BASE_DIR):
-            run(f'sed -i s:drf_seed:{self.project_name}:g drf_seed/*')
-            run(f'mv drf_seed {self.project_name}')
+            __run__(f'sed -i s:drf_seed:{self.project_name}:g drf_seed/*')
+            __run__(f'mv drf_seed {self.project_name}')
 
     def _set_router(self, router=None):
         """Sets default router to use, if any"""
@@ -140,9 +143,9 @@ class SetupDrfSeed:
         }
         if router:
             if router == 'none':
-                run(f'''sed -i "/router/d" {self.project_name}/urls.py''')
+                __run__(f'''sed -i "/router/d" {self.project_name}/urls.py''')
             else:
-                run(f'''sed -i "s:DefaultRouter:{_ROUTERS[router]}:g" {self.project_name}/urls.py''')
+                __run__(f'''sed -i "s:DefaultRouter:{_ROUTERS[router]}:g" {self.project_name}/urls.py''')
 
     def _set_auth_classes(self, auth_classes=None):
         """Sets Authentication classes to use in settings.py"""
@@ -163,10 +166,10 @@ class SetupDrfSeed:
                 else:
                     raise KeyError(f"{A['key']} not found, creating...")
             except KeyError:
-                run(f"sed -i '/REST_FRAMEWORK/a\    ),' {self.settings_str}")
+                __run__(f"sed -i '/REST_FRAMEWORK/a\    ),' {self.settings_str}")
                 for a in auth_classes:
-                    run(f"""sed -i "/REST_FRAMEWORK/a\        '{A[a]}'," {self.settings_str}""")
-                run(f"""sed -i "/REST_FRAMEWORK/a\    '{A['key']}': (" {self.settings_str}""")
+                    __run__(f"""sed -i "/REST_FRAMEWORK/a\        '{A[a]}'," {self.settings_str}""")
+                __run__(f"""sed -i "/REST_FRAMEWORK/a\    '{A['key']}': (" {self.settings_str}""")
 
     def _set_pagination(self, pag=None, size=20):
         """Sets pagination class in settings.py"""
@@ -179,8 +182,8 @@ class SetupDrfSeed:
         }
         if pag:
             if pag == 'none':
-                run(f'''sed -i "/{P['key']}/d" {self.settings_str}''')
-                run(f'''sed -i "/{P['size_key']}/d" {self.settings_str}''')
+                __run__(f'''sed -i "/{P['key']}/d" {self.settings_str}''')
+                __run__(f'''sed -i "/{P['size_key']}/d" {self.settings_str}''')
             else:
                 try:
                     DRF = self.drf_settings
@@ -190,13 +193,13 @@ class SetupDrfSeed:
                         print(f"{P['key']} exists, its value is: {pag_val}, with size {size_val} ")
                         print(f'Replacing {pag_val} with {P[pag]}')
                         print(f"Replacing {P['size_key']}: {size_val} with {P['size_key']}: {size}")
-                        run(f'''sed -i "s/{pag_val}/{P[pag]}/g" {self.settings_str}''')
-                        run(f'''sed -i "s/'{P['size_key']}': {size_val},/'{P['size_key']}': {size},/g" {self.settings_str}''')
+                        __run__(f'''sed -i "s/{pag_val}/{P[pag]}/g" {self.settings_str}''')
+                        __run__(f'''sed -i "s/'{P['size_key']}': {size_val},/'{P['size_key']}': {size},/g" {self.settings_str}''')
                     else:
                         raise KeyError(f"{P['key']} not found, creating...")
                 except KeyError:
-                    run(f"""sed -i "/REST_FRAMEWORK/a\    '{P['key']}': '{P[pag]}'," {self.settings_str}""")
-                    run(f'''sed -i "/{P['key']}/a\    '{P['size_key']}': {size}," {self.settings_str}''')
+                    __run__(f"""sed -i "/REST_FRAMEWORK/a\    '{P['key']}': '{P[pag]}'," {self.settings_str}""")
+                    __run__(f'''sed -i "/{P['key']}/a\    '{P['size_key']}': {size}," {self.settings_str}''')
 
 
     def _set_throttling(self, classes=None):
@@ -225,15 +228,15 @@ class SetupDrfSeed:
                         if cond1:
                             cond2 = T[s] not in DRF[T['classes']]
                         if cond2:
-                            run(f'''sed -i "{T['classes']}/a\        {T[s]}," {self.settings_str}''')
+                            __run__(f'''sed -i "{T['classes']}/a\        {T[s]}," {self.settings_str}''')
                 else:
                     raise KeyError(f"{T['classes']} not found, creating...")
             except KeyError:
-                run(f"sed -i '/REST_FRAMEWORK/a\    ),' {self.settings_str}")
+                __run__(f"sed -i '/REST_FRAMEWORK/a\    ),' {self.settings_str}")
                 for s in scopes.keys():
                     if s in ('anon', 'user', 'scoped'):
-                        run(f"""sed -i "/REST_FRAMEWORK/a\        '{T[s]}'," {self.settings_str}""")
-                run(f"""sed -i "/REST_FRAMEWORK/a\    '{T['classes']}': (" {self.settings_str}""")
+                        __run__(f"""sed -i "/REST_FRAMEWORK/a\        '{T[s]}'," {self.settings_str}""")
+                __run__(f"""sed -i "/REST_FRAMEWORK/a\    '{T['classes']}': (" {self.settings_str}""")
             try:
                 if T['rates'] in DRF.keys():
                     print(f"{T['rates']} exists, contains:")
@@ -243,65 +246,65 @@ class SetupDrfSeed:
                             cond1 = k != 'scoped'
                             cond2 = k not in DRF[T['rates']].keys()
                             if cond1 and cond2:
-                                run(f"""sed -i "/{T["rates"]}/a\        '{k}': '{v}'," {self.settings_str}""")
+                                __run__(f"""sed -i "/{T["rates"]}/a\        '{k}': '{v}'," {self.settings_str}""")
                 else:
                     raise KeyError(f"{T['rates']} not found, creating...")
             except KeyError:
-                run(f"sed -i '/REST_FRAMEWORK/a\    }},' {self.settings_str}")
+                __run__(f"sed -i '/REST_FRAMEWORK/a\    }},' {self.settings_str}")
                 for k, v in scopes.items():
                     if k != 'scoped':
-                        run(f"""sed -i "/REST_FRAMEWORK/a\        '{k}': '{v}'," {self.settings_str}""")
-                run(f"""sed -i "/REST_FRAMEWORK/a\    '{T['rates']}': {{" {self.settings_str}""")
+                        __run__(f"""sed -i "/REST_FRAMEWORK/a\        '{k}': '{v}'," {self.settings_str}""")
+                __run__(f"""sed -i "/REST_FRAMEWORK/a\    '{T['rates']}': {{" {self.settings_str}""")
     
     def _set_static_root(self, dir_name):
         hook = 'REST_FRAMEWORK'
         if dir_name:
             if hasattr(self.settings, 'STATIC_ROOT'):
                 print(f'STATIC_ROOT exists, replacing value to {dir_name}')
-                run(f'''sed -i "/STATIC_ROOT/d" {self.settings_str}''')
-                run(f'''sed -i "/{hook}/i\STATIC_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
+                __run__(f'''sed -i "/STATIC_ROOT/d" {self.settings_str}''')
+                __run__(f'''sed -i "/{hook}/i\STATIC_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
             else:
                 print(f'STATIC_ROOT not found, creating...')
-                run(f'''sed -i "/{hook}/i\STATIC_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
+                __run__(f'''sed -i "/{hook}/i\STATIC_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
 
     def _set_static_url(self, url_name):
         hook = 'REST_FRAMEWORK'
         if url_name:
             if hasattr(self.settings, 'STATIC_URL'):
                 print(f'STATIC_URL exists, replacing value to {url_name}')
-                run(f'''sed -i "/STATIC_URL/d" {self.settings_str}''')
-                run(f'''sed -i "/{hook}/i\STATIC_URL= '/{url_name}/'" {self.settings_str}''')
+                __run__(f'''sed -i "/STATIC_URL/d" {self.settings_str}''')
+                __run__(f'''sed -i "/{hook}/i\STATIC_URL= '/{url_name}/'" {self.settings_str}''')
             else:
                 print(f'STATIC_URL not found, creating...')
-                run(f'''sed -i "/{hook}/i\STATIC_URL = '/{url_name}/'" {self.settings_str}''')
+                __run__(f'''sed -i "/{hook}/i\STATIC_URL = '/{url_name}/'" {self.settings_str}''')
 
     def _set_media_root(self, dir_name):
         hook = 'REST_FRAMEWORK'
         if dir_name:
             if hasattr(self.settings, 'MEDIA_ROOT'):
                 print(f'MEDIA_ROOT exists, replacing value to {dir_name}')
-                run(f'''sed -i "/MEDIA_ROOT/d" {self.settings_str}''')
-                run(f'''sed -i "/{hook}/i\MEDIA_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
+                __run__(f'''sed -i "/MEDIA_ROOT/d" {self.settings_str}''')
+                __run__(f'''sed -i "/{hook}/i\MEDIA_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
             else:
                 print(f'MEDIA_ROOT not found, creating...')
-                run(f'''sed -i "/{hook}/i\MEDIA_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
+                __run__(f'''sed -i "/{hook}/i\MEDIA_ROOT = os.path.join(BASE_DIR, '{dir_name}')" {self.settings_str}''')
 
     def _set_media_url(self, url_name):
         hook = 'REST_FRAMEWORK'
         if url_name:
             if hasattr(self.settings, 'MEDIA_URL'):
                 print(f'MEDIA_URL exists, replacing value to {url_name}')
-                run(f'''sed -i "/MEDIA_URL/d" {self.settings_str}''')
-                run(f'''sed -i "/{hook}/i\MEDIA_URL= '/{url_name}/'" {self.settings_str}''')
+                __run__(f'''sed -i "/MEDIA_URL/d" {self.settings_str}''')
+                __run__(f'''sed -i "/{hook}/i\MEDIA_URL= '/{url_name}/'" {self.settings_str}''')
             else:
                 print(f'MEDIA_URL not found, creating...')
-                run(f'''sed -i "/{hook}/i\MEDIA_URL = '/{url_name}/'" {self.settings_str}''')
-            run(f'''sed -i "/import settings/d" {self.project_name}/urls.py''')
-            run(f'''sed -i "/import static/d" {self.project_name}/urls.py''')
-            run(f'''sed -i "/from django.conf.urls/i\\from django.conf import settings" {self.project_name}/urls.py''')
-            run(f'''sed -i "/from django.conf.urls/a\\from django.conf.urls.static import static" {self.project_name}/urls.py''')
-            run(f'''sed -i "/static(settings.MEDIA_URL,/d" {self.project_name}/urls.py''')
-            run(r'''sed -i "$a\urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)" {name}/urls.py'''.format(name=self.project_name))
+                __run__(f'''sed -i "/{hook}/i\MEDIA_URL = '/{url_name}/'" {self.settings_str}''')
+            __run__(f'''sed -i "/import settings/d" {self.project_name}/urls.py''')
+            __run__(f'''sed -i "/import static/d" {self.project_name}/urls.py''')
+            __run__(f'''sed -i "/from django.conf.urls/i\\from django.conf import settings" {self.project_name}/urls.py''')
+            __run__(f'''sed -i "/from django.conf.urls/a\\from django.conf.urls.static import static" {self.project_name}/urls.py''')
+            __run__(f'''sed -i "/static(settings.MEDIA_URL,/d" {self.project_name}/urls.py''')
+            __run__(r'''sed -i "$a\urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)" {name}/urls.py'''.format(name=self.project_name))
 
 if __name__ == '__main__':
     s = SetupDrfSeed()
