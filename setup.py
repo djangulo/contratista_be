@@ -312,7 +312,7 @@ class SetupDrfSeed:
         secret_key_file = os.path.join(BASE_DIR, self.project_name, 'secret_key.py')
         if not secret_key_file in os.listdir(os.path.join(BASE_DIR, self.project_name)):
             chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-            key = ''.join(systemRandom().choice(chars) for _ in range(50))
+            key = ''.join(SystemRandom().choice(chars) for _ in range(50))
             with open(secret_key_file, 'w') as fn:
                 fn.write(f'SECRET_KEY = "{key}""')
         __run__(f'''sed -i "s/SECRET_KEY = ''/#SECRET_KEY = ''/g" {self.settings_str}''')
