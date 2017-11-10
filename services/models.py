@@ -1,0 +1,190 @@
+from django.conf import settings
+from django.db import models
+from django.utils.text import slugify
+
+def company_directory_path(instance, filename):
+    return f'companies/company_{instance.id}/{filename}'
+
+def user_directory_path(instance, filename):
+    return f'users/user_{instance.user.id}/{filename}'
+
+
+class Customer(models.Model):
+    name = models.CharField(max_length=125, blank=False)
+    display_name = models.CharField(max_length=125, blank=True, null=True)
+    primary_phone = models.CharField(max_length=14, blank=False)
+    secondary_phone = models.CharField(max_length=14, blank=True)
+    registered_at = models.DateTimeField(auto_now_add=True)
+    picture = models.ImageField(
+        upload_to=customer_directory_path,
+        blank=True,
+        null=True
+    )
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name='customer',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = 'customer'
+        verbose_name_plural = 'customers'
+
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Person, self).save(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        if self.display_name is None:
+            self.display_name = self.name
+        super(Person, self).clean(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.name}: {self.display_name}'
+
+
+class Vendor(models.Model):
+    company = models.ForeignKey(
+        'services.Company',
+        related_name='members',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None
+    )
+    career = models.ForeignKey(
+        'services.Career',
+        null=True,
+        blank=True,
+        related_name='vendors'
+    )
+    customer = models.OneToOneField(
+        'services.Customer',
+        blank=True,
+        null=True,
+        related_name='vendor_info'
+    )
+    
+    class Meta:
+        verbose_name = 'vendor information'
+        verbose_name_plural = 'vendors information'
+
+
+class Career(models.Model):
+    industry = models.CharField(max_length=50, unique=True)
+    trade = models.CharField(max_length=50, unique=True)
+    institution = models.ForeignKey(
+        'services.Institution',
+        null=True,
+        blank=True,
+        related_name='careers'
+    )
+
+
+class Institution(models.Model):
+    short_name = models.CharField(max_length=15, unique=True, blank=False)
+    long_name = models.CharField(max_length=150, unique=True, blank=False)
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=50, unique=True, blank=False)
+    slug = models.SlugField(max_length=50, unique=True, blank=True, editable=False)
+    description = models.CharField(max_length=255, unique=True, blank=False)
+
+    class Meta:
+        verbose_name = 'category'
+        verbose_name_plural = 'categories'
+
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Category, self).save(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Category, self).clean(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.name}'
+
+class Job(models.Model):
+    job_title = models.CharField(max_length=50, blank=False)
+
+
+class NationalId(models.Model):
+    CEDULA = 0
+    PASSPORT = 1
+    SSN = 2
+    ID_TYPE_CHOICES = (
+        (CEDULA, 'Cedula'),
+        (PASSPORT, 'Passport'),
+        (SSN, 'Social Security Number')
+    )
+    id_type = models.IntegerField(
+        choices=ID_TYPE_CHOICES,
+        default=CEDULA,
+        verbose_name='ID Type: Cedula, SSN, Passport'
+    )
+    id_number = models.CharField(max_length=15, blank=False)
+    owner = models.OneToOneField(
+        'services.Customer',
+        related_name='national_id',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        if self.id_type == 0:
+            return f'{self.id_number[:3]}-{self.id_number[3:10]}-{self.id_number[-1:]}'
+        elif self.id_type == 1:
+            return f'{self.id_number}'
+        elif self.id_type == 2:
+            return f'{self.id_number[:3]}-{self.id_number[3:5]}-{self.id_number[-4:]}'
+
+
+class Address(models.Model):
+    full_name = models.CharField(max_length=100, blank=False)
+    state_province_region = models.CharField(max_length=50, blank=False)
+    city = models.CharField(max_length=50, blank=False)
+    sector = models.CharField(max_length=50, blank=False)
+    address_line_one = models.CharField(max_length=150, blank=False)
+    address_line_two = models.CharField(max_length=150, blank=True)
+    phone_number = models.CharField(max_length=14, blank=False)
+    is_primary = models.BooleanField(default=False, editable=False)
+    owner = models.ForeignKey(
+        'services.Customer',
+        related_name='adresses',
+        on_delete=models.CASCADE
+    )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Address, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.owner.name}: address_{self.id}'
+
+
+class Company(models.Model):
+    rnc = models.CharField(max_length=9, blank=False, unique=True)
+    name = models.CharField(max_length=150, blank=False)
+    slug = models.SlugField(editable=False, blank=True, default='')
+    logo = models.ImageField(
+        upload_to=company_directory_path,
+        blank=True,
+        null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.OneToOneField(
+        'services.Client',
+        related_name='creator_of',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+    class Meta:
+        verbose_name = 'company'
+        verbose_name_plural = 'companies'
+        unique_together = (
+            ('rnc', 'name')
+        )
