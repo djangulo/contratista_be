@@ -18,18 +18,16 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, username, password, **extra_fields):
+    def create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError('Users must have a valid email address')
-        if not username:
-            username = self.models.normalize_username(email.split('@')[0])
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
         
-    def create_superuser(self, email, username, password, **extra_fields):
+    def create_superuser(self, email, password, **extra_fields):
         user = self.create_user(email=email, password=password)
         user.is_admin = True
         user.save(using=self._db)
