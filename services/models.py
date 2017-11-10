@@ -5,7 +5,7 @@ from django.utils.text import slugify
 def company_directory_path(instance, filename):
     return f'companies/company_{instance.id}/{filename}'
 
-def user_directory_path(instance, filename):
+def customer_directory_path(instance, filename):
     return f'users/user_{instance.user.id}/{filename}'
 
 
@@ -23,7 +23,8 @@ class Customer(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name='customer',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=False
     )
 
     class Meta:
@@ -33,12 +34,12 @@ class Customer(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        super(Person, self).save(*args, **kwargs)
+        super(Customer, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
         if self.display_name is None:
             self.display_name = self.name
-        super(Person, self).clean(*args, **kwargs)
+        super(Customer, self).clean(*args, **kwargs)
 
     def __str__(self):
         return f'{self.name}: {self.display_name}'
@@ -108,6 +109,7 @@ class Category(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+
 class Job(models.Model):
     job_title = models.CharField(max_length=50, blank=False)
 
@@ -176,7 +178,7 @@ class Company(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.OneToOneField(
-        'services.Client',
+        'services.Customer',
         related_name='creator_of',
         on_delete=models.SET_NULL,
         null=True
