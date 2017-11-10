@@ -3,7 +3,7 @@ import os
 import sys
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "drf_seed.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "contratista_be.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:

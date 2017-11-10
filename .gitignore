@@ -12,3 +12,5 @@ fablog.log
 virtualenv
 
 .coverage
+
+secret_key.py

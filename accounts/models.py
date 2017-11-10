@@ -24,14 +24,13 @@ class CustomUserManager(BaseUserManager):
         if not username:
             username = self.models.normalize_username(email.split('@')[0])
         email = self.normalize_email(email)
-        username = self.model.normalize_username(username)
-        user = self.model(email=email, username=username, **extra_fields)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
         
     def create_superuser(self, email, username, password, **extra_fields):
-        user = self.create_user(email=email, username=username, password=password)
+        user = self.create_user(email=email, password=password)
         user.is_admin = True
         user.save(using=self._db)
         return user
@@ -39,13 +38,14 @@ class CustomUserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(blank=False, unique=True)
-    username = models.CharField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)
+    _is_vendor = models.BooleanField(default=False)
+    _is_client = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []
 
     def get_full_name(self):
         return self.username
@@ -69,3 +69,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_superuser(self):
         return self.is_admin
+
+    @property
+    def is_client(self):
+        return self._is_client
+
+    @is_client.setter
+    def is_client(self, value):
+        self._is_client = value
+
+    @property
+    def is_vendor(self):
+        return self._is_vendor
+
+    @is_vendor.setter
+    def is_vendor(self, value):
+        self._is_vendor = value
