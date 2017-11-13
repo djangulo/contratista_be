@@ -74,7 +74,7 @@ class Vendor(models.Model):
 
 class Career(models.Model):
     industry = models.CharField(max_length=50, unique=True)
-    trade = models.CharField(max_length=50, unique=True)
+    trade_name = models.CharField(max_length=100, unique=True)
     institution = models.ForeignKey(
         'services.Institution',
         null=True,
@@ -92,6 +92,12 @@ class Category(models.Model):
     name = models.CharField(max_length=50, unique=True, blank=False)
     slug = models.SlugField(max_length=50, unique=True, blank=True, editable=False)
     description = models.CharField(max_length=255, unique=True, blank=False)
+    career = models.OneToOneField(
+        'services.Career',
+        related_name='categorical_name', 
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = 'category'
