@@ -41,6 +41,10 @@ class Customer(models.Model):
             self.display_name = self.name
         super(Customer, self).clean(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        self.picture.delete(save=False)
+        super(Customer, self).delete(*args, **kwargs)
+
     def __str__(self):
         return f'{self.name}: {self.display_name}'
 
@@ -58,13 +62,15 @@ class Vendor(models.Model):
         'services.Career',
         null=True,
         blank=True,
-        related_name='vendors'
+        related_name='vendors',
+        on_delete=models.SET_NULL
     )
     customer = models.OneToOneField(
         'services.Customer',
         blank=True,
         null=True,
-        related_name='vendor_info'
+        related_name='vendor_info',
+        on_delete=models.CASCADE
     )
     
     class Meta:
@@ -79,7 +85,8 @@ class Career(models.Model):
         'services.Institution',
         null=True,
         blank=True,
-        related_name='careers'
+        related_name='careers',
+        on_delete=models.SET_NULL,
     )
 
 
@@ -94,7 +101,8 @@ class Category(models.Model):
     description = models.CharField(max_length=255, unique=True, blank=False)
     career = models.OneToOneField(
         'services.Career',
-        related_name='categorical_name', 
+        related_name='categorical_name',
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
     )
@@ -118,6 +126,13 @@ class Category(models.Model):
 
 class Job(models.Model):
     job_title = models.CharField(max_length=50, blank=False)
+    category = models.ForeignKey(
+        'services.Category',
+        related_name='jobs',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
 
 class NationalId(models.Model):
@@ -196,3 +211,15 @@ class Company(models.Model):
         unique_together = (
             ('rnc', 'name')
         )
+
+    def delete(self, *args, **kwargs):
+        self.logo.delete(save=False)
+        super(Company, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Company, self).save(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Company, self).clean(*args, **kwargs)
