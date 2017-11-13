@@ -79,16 +79,6 @@ class CustomerModelTests(TestCase):
             )            
         )
     
-    @classmethod
-    def tearDownClass(cls):
-        rmtree(os.path.join(
-                    settings.MEDIA_ROOT,
-                    'users',
-                    f'user_{cls.user["object"].id}'
-                )
-            )
-        super(CustomerModelTests, cls).tearDownClass()
-
 
 class AdressModelTests(TestCase):
 

@@ -16,14 +16,12 @@ class AccountAPITests(APITestCase):
     def setUpTestData(cls):
         user_one = User.objects.create_user(
                             email='merida@kingdom.com',
-                            username='meridathebrave',
                             password='testpassword'
                         )
         user_one.save()
         cls.user1 = {
             'user': user_one,
             'email': 'merida@kingdom.com',
-            'username': 'meridathebrave',
             'password': 'testpassword'
         }
         cls.token1 = Token.objects.get(user_id=1)
@@ -32,7 +30,7 @@ class AccountAPITests(APITestCase):
         token = str(self.token1)
         url = reverse('get-token')
         response = self.client.post(url, data={
-            'username': self.user1['email'],
+            'email': self.user1['email'],
             'password': self.user1['password']
         })
         self.assertEqual(response.data['token'], token)
@@ -40,7 +38,7 @@ class AccountAPITests(APITestCase):
     def test_token_rebound_on_credential_failure(self):
         url = reverse('get-token')
         response = self.client.post(url, data={
-            'username': 'phoneyusername',
+            'email': 'phney@email.com',
             'password': 'phoneypassword'
         })
         self.assertEqual(response.status_code, 400)
