@@ -1,4 +1,6 @@
+import googlemaps
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.text import slugify
 
@@ -174,6 +176,7 @@ class Address(models.Model):
     address_line_two = models.CharField(max_length=150, blank=True)
     phone_number = models.CharField(max_length=14, blank=False)
     is_primary = models.BooleanField(default=False, editable=False)
+    latlon = JSONField(blank=True, editable=False)
     owner = models.ForeignKey(
         'services.Customer',
         related_name='adresses',
