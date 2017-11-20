@@ -78,6 +78,21 @@ class CustomerModelTests(TestCase):
                 )
             )            
         )
+
+    def test_reverse_relation_to_user_model(self):
+        customer = Customer.objects.create(
+            name='Waldo The Unfindable',
+            display_name='waldo',
+            primary_phone='5555555555',
+            secondary_phone='1234567893',
+            picture=SimpleUploadedFile(
+                name='my_awesome_face.jpg',
+                content=open(TEST_IMAGE_PATH, 'rb').read(),
+                content_type='image/jpeg'
+            ),
+            user=self.user['object']
+        )
+        self.assertEqual(customer.user, self.user['object'])
     
 
 class AdressModelTests(TestCase):
