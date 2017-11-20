@@ -12,7 +12,8 @@ def customer_directory_path(instance, filename):
 
 
 class Customer(models.Model):
-    name = models.CharField(max_length=125, blank=False)
+    first_name = models.CharField(max_length=50, blank=False)
+    last_name = models.CharField(max_length=50, blank=False)
     display_name = models.CharField(max_length=125, blank=True, null=True)
     primary_phone = models.CharField(max_length=14, blank=False)
     secondary_phone = models.CharField(max_length=14, blank=True)
@@ -40,7 +41,7 @@ class Customer(models.Model):
 
     def clean(self, *args, **kwargs):
         if self.display_name is None:
-            self.display_name = self.name
+            self.display_name = f'{self.first_name} {self.last_name}'
         super(Customer, self).clean(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
