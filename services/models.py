@@ -49,7 +49,7 @@ class Customer(models.Model):
         super(Customer, self).delete(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.name}: {self.display_name}'
+        return f'{self.first_name} {self.last_name}: {self.display_name}'
 
 
 class Vendor(models.Model):
@@ -170,14 +170,16 @@ class NationalId(models.Model):
 
 class Address(models.Model):
     full_name = models.CharField(max_length=100, blank=False)
-    state_province_region = models.CharField(max_length=50, blank=False)
-    city = models.CharField(max_length=50, blank=False)
-    sector = models.CharField(max_length=50, blank=False)
+    state_province_region = models.CharField(max_length=50, blank=True)
+    city = models.CharField(max_length=50, blank=True)
+    sector = models.CharField(max_length=50, blank=True)
+    country = models.CharField(max_length=200, default='Dominican Republic')
     address_line_one = models.CharField(max_length=150, blank=False)
     address_line_two = models.CharField(max_length=150, blank=True)
     phone_number = models.CharField(max_length=14, blank=False)
     is_primary = models.BooleanField(default=False, editable=False)
-    latlon = JSONField(blank=True, editable=False)
+    latlng = JSONField(blank=True, editable=False, null=True) # psql version
+    formatted_name = models.CharField(max_length=500, blank=True, editable=False)
     owner = models.ForeignKey(
         'services.Customer',
         related_name='adresses',
@@ -188,8 +190,18 @@ class Address(models.Model):
         self.full_clean()
         super(Address, self).save(*args, **kwargs)
 
+    def clean(self, *args, **kwargs):
+        self.formatted_name = ', '.join((
+            f'{self.address_line_one}',
+            f'{self.sector}',
+            f'{self.city}',
+            f'{self.state_province_region}',
+            f'{self.country}'
+        ))
+        super(Address, self).clean(*args, **kwargs)
+
     def __str__(self):
-        return f'{self.owner.name}: address_{self.id}'
+        return f'{self.owner.display_name}: address_{self.id}'
 
 
 class Company(models.Model):
