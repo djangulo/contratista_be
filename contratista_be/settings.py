@@ -11,8 +11,12 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-from .secret_key import SECRET_KEY
-from .gmaps_key import GOOGLEMAPS_SECRET_KEY
+from .secrets import (
+    GOOGLEMAPS_SECRET_KEY,
+    POSTGRES_PASSWD,
+    RABBITMQ_VHOST_PASSWD
+    SECRET_KEY,
+)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -85,7 +89,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'contratista_cluster',
         'USER': 'contratista_user',
-        'PASSWORD': 'Tropicana127',
+        'PASSWORD': POSTGRES_PASSWD,
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -154,3 +158,8 @@ CORS_ORIGIN_WHITELIST = (
 )
 
 AUTH_USER_MODEL = 'accounts.User'
+
+CELERY_BROKER_URL = 'amqp://djangulo:{0}@localhost:5672/contratista_be'.format(RABBITMQ_VHOST_PASSWD)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

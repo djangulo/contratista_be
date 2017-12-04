@@ -13,5 +13,5 @@ virtualenv
 
 .coverage
 
-secret_key.py
-gmaps_key.py
+secret*.py
+secrets.py
