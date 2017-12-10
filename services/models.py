@@ -182,7 +182,7 @@ class Address(models.Model):
     formatted_name = models.CharField(max_length=500, blank=True, editable=False)
     owner = models.ForeignKey(
         'services.Customer',
-        related_name='adresses',
+        related_name='addresses',
         on_delete=models.CASCADE
     )
 

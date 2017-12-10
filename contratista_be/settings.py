@@ -14,7 +14,7 @@ import os
 from .secrets import (
     GOOGLEMAPS_SECRET_KEY,
     POSTGRES_PASSWD,
-    RABBITMQ_VHOST_PASSWD
+    RABBITMQ_VHOST_PASSWD,
     SECRET_KEY,
 )
 
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'accounts',
-    'services'
+    'services',
 ]
 
 MIDDLEWARE = [
