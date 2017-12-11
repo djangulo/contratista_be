@@ -5,6 +5,7 @@ from .models import Address
 from .tasks import enqueue_address
 
 @receiver(post_save, sender=Address)
-def start_address_latlong(sender, instance, **kwargs):
+def start_address_latlong(sender, instance, created, **kwargs):
     print('signal sent, shit is working')
-    enqueue_address.delay(instance.id)
+    print(created)
+    enqueue_address.apply_async((instance.id,created,))
