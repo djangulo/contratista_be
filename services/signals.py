@@ -6,5 +6,4 @@ from .tasks import enqueue_address
 
 @receiver(post_save, sender=Address)
 def start_address_latlong(sender, instance, **kwargs):
-    print('signal sent, shit is working')
     enqueue_address.delay(instance.id)
